@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.log.mapper.ScenarioReplayMapper">
+    <insert id="insert">
+        INSERT INTO scenario_replay (batch_id, algorithm_version, seed, base_time, line_count)
+        VALUES (#{batchId}, #{version}, #{seed}, #{baseTime}, #{count})
+    </insert>
+    <resultMap id="batchReplay" type="com.csys.logdetector.log.mapper.ScenarioReplayMapper$BatchReplay">
+        <constructor>
+            <arg column="scenario_code" javaType="string"/><arg column="file_sha256" javaType="string"/>
+            <arg column="algorithm_version" javaType="java.lang.Integer"/><arg column="seed" javaType="java.lang.Long"/>
+            <arg column="base_time" javaType="java.lang.Long"/><arg column="line_count" javaType="java.lang.Integer"/>
+        </constructor>
+    </resultMap>
+    <select id="find" resultMap="batchReplay">
+        SELECT b.scenario_code, b.file_sha256, r.algorithm_version, r.seed, r.base_time, r.line_count
+        FROM import_batch b LEFT JOIN scenario_replay r ON r.batch_id = b.id WHERE b.id = #{batchId}
+    </select>
+</mapper>

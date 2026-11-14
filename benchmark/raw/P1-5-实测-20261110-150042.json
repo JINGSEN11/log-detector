@@ -1,0 +1,102 @@
+{
+  "measuredAt": "2026-11-10T15:00:42",
+  "concurrency": 1,
+  "results": [
+    {
+      "lines": 10000,
+      "bytes": 1069570,
+      "batchId": 29,
+      "parsed": 10000,
+      "skipped": 0,
+      "importMs": 3665.93,
+      "readTimesMs": [
+        44.56,
+        40.94,
+        29.14,
+        31.33,
+        44.42,
+        28.14,
+        24.03,
+        23.47,
+        50.33,
+        44.34,
+        26.27,
+        22.26,
+        49.27,
+        28.63,
+        27.48,
+        23.5,
+        19.87,
+        20.31,
+        41.12,
+        21.39
+      ],
+      "readP95Ms": 49.27
+    },
+    {
+      "lines": 30000,
+      "bytes": 3230930,
+      "batchId": 30,
+      "parsed": 30000,
+      "skipped": 0,
+      "importMs": 8349.95,
+      "readTimesMs": [
+        56.55,
+        48.09,
+        41.54,
+        38.95,
+        35.53,
+        35.61,
+        44.66,
+        43.07,
+        47.42,
+        48.74,
+        38.29,
+        32.65,
+        32.25,
+        31.35,
+        29.39,
+        28.46,
+        54.7,
+        37.99,
+        36.9,
+        40.15
+      ],
+      "readP95Ms": 54.7
+    }
+  ],
+  "memorySamples": [
+    {
+      "at": "2026-11-10T15:00:29",
+      "value": "539.5MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:31",
+      "value": "532.7MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:34",
+      "value": "661.1MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:36",
+      "value": "662MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:38",
+      "value": "662MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:40",
+      "value": "662.7MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:00:42",
+      "value": "664.1MiB / 15.49GiB"
+    }
+  ],
+  "errors": [],
+  "p95": "20 sequential batch page reads, pageSize=100; nearest-rank; not import P95",
+  "memory": "docker stats backend container; approximate sampled working set, not heap peak",
+  "warmup": "none"
+}

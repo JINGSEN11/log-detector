@@ -1,0 +1,82 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: csys-template
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+  datasource:
+    # 容器内是 mysql，本机直跑改成 localhost；全部可用环境变量覆盖
+    url: ${DB_URL:jdbc:mysql://localhost:3306/log_detector?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:csys}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 5000
+      connection-init-sql: "SET time_zone = '+08:00'"
+
+  # 初始化表结构；管理员账号由 UserBootstrap 创建。
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/schema.sql
+      continue-on-error: false
+
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+# ---------- 鉴权（值由环境变量注入，禁止写死生产密钥）----------
+app:
+  jwt:
+    secret: ${JWT_SECRET:csys-template-dev-secret-please-change-me-32bytes}
+    ttl-minutes: ${JWT_TTL_MINUTES:120}
+  admin:
+    password: ${APP_ADMIN_PASSWORD:admin123}
+  log:
+    ip-hmac-key: ${LOG_IP_HMAC_KEY:}
+
+# ---------- 大模型 ----------
+llm:
+  mock: ${LLM_MOCK:true}
+  base-url: ${LLM_BASE_URL:https://api.openai.com/v1}
+  api-key: ${LLM_API_KEY:}
+  model: ${LLM_MODEL:gpt-4o-mini}
+  timeout-seconds: ${LLM_TIMEOUT_SECONDS:60}
+
+logging:
+  level:
+    root: info
+    com.csys.logdetector: info
+    com.csys.logdetector.demo.mapper: debug

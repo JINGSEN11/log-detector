@@ -1,0 +1,27 @@
+{
+  "measuredAt": "2026-11-10T15:04:32",
+  "concurrency": 1,
+  "results": [
+    {
+      "batchId": 29,
+      "elapsedMs": 348.53,
+      "hitCount": 0,
+      "eventCount": 0
+    },
+    {
+      "batchId": 30,
+      "elapsedMs": 643.72,
+      "hitCount": 0,
+      "eventCount": 0
+    }
+  ],
+  "memorySamples": [
+    {
+      "at": "2026-11-10T15:04:32.000",
+      "value": "666.1MiB / 15.49GiB"
+    }
+  ],
+  "errors": [],
+  "scope": "clean synthetic logs; one end-to-end detection per batch; no P95",
+  "memory": "docker stats sampled working set; not JVM heap peak"
+}

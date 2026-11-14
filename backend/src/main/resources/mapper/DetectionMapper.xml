@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.detection.mapper.DetectionMapper">
+  <resultMap id="log" type="com.csys.logdetector.detection.engine.DetectionEngine$Log">
+    <constructor>
+      <arg column="id" javaType="_long"/><arg column="client_ip_hash" javaType="string"/><arg column="client_ip_mask" javaType="string"/>
+      <arg column="log_time" javaType="java.time.LocalDateTime"/><arg column="method" javaType="string"/><arg column="path" javaType="string"/>
+      <arg column="query_string" javaType="string"/><arg column="status_code" javaType="_int"/><arg column="user_agent" javaType="string"/><arg column="raw_line_masked" javaType="string"/>
+    </constructor>
+  </resultMap>
+  <resultMap id="eventRow" type="java.util.LinkedHashMap">
+    <result property="id" column="id" javaType="long"/><result property="clientIpMask" column="client_ip_mask" javaType="string"/>
+    <result property="windowStart" column="window_start" javaType="java.time.LocalDateTime"/><result property="windowEnd" column="window_end" javaType="java.time.LocalDateTime"/>
+    <result property="riskScore" column="risk_score" javaType="java.math.BigDecimal"/><result property="severity" column="severity" javaType="string"/><result property="status" column="status" javaType="string"/>
+    <result property="hitCount" column="hit_count" javaType="long"/><result property="logCount" column="log_count" javaType="long"/><result property="ruleCodesRaw" column="rule_codes" javaType="string"/>
+  </resultMap>
+  <resultMap id="evidenceRow" type="java.util.LinkedHashMap">
+    <result property="logId" column="id" javaType="long"/><result property="ruleCode" column="rule_code" javaType="string"/><result property="matchedField" column="matched_field" javaType="string"/>
+    <result property="evidenceSnippet" column="evidence_snippet" javaType="string"/><result property="severity" column="severity" javaType="string"/><result property="logTime" column="log_time" javaType="java.time.LocalDateTime"/><result property="rawLineMasked" column="raw_line_masked" javaType="string"/>
+  </resultMap>
+  <select id="lockBatch" resultType="long">SELECT id FROM import_batch WHERE id = #{id} FOR UPDATE</select>
+  <select id="detectedCount" resultType="long">SELECT COUNT(*) FROM detection_batch WHERE batch_id = #{id}</select>
+  <select id="logs" resultMap="log">SELECT id, client_ip_hash, client_ip_mask, log_time, method, path, query_string, status_code, user_agent, raw_line_masked FROM log_entry WHERE batch_id = #{id} AND parse_status = 'SUCCESS' ORDER BY client_ip_hash, log_time, id</select>
+  <insert id="registerRule">INSERT IGNORE INTO rule_definition (rule_code, rule_name, category, default_severity, description) VALUES (#{code}, #{code}, 'DETECTION', 'HIGH', '')</insert>
+  <insert id="insertEvent" useGeneratedKeys="true" keyProperty="id">INSERT INTO event (client_ip_hash, client_ip_mask, window_start, window_end, risk_score, severity, status) VALUES (#{ipHash}, #{ipMask}, #{windowStart}, #{windowEnd}, #{risk}, #{severity}, 'NEW')</insert>
+  <insert id="insertHit" useGeneratedKeys="true" keyProperty="id">INSERT INTO rule_hit (log_entry_id, rule_code, matched_field, evidence_snippet, severity, hit_time) VALUES (#{logId}, #{rule}, #{field}, #{evidence}, #{severity}, #{time})</insert>
+  <insert id="insertEvidence">INSERT INTO event_evidence (event_id, rule_hit_id, is_primary) VALUES <foreach collection="rows" item="row" separator=",">(#{row.eventId}, #{row.hitId}, #{row.primary})</foreach></insert>
+  <insert id="markDetected">INSERT INTO detection_batch (batch_id) VALUES (#{id})</insert>
+  <sql id="eventSelect">SELECT e.id, e.client_ip_mask, e.window_start, e.window_end, e.risk_score, e.severity, e.status, COUNT(rh.id) hit_count, COUNT(DISTINCT rh.log_entry_id) log_count, GROUP_CONCAT(DISTINCT rh.rule_code ORDER BY rh.rule_code SEPARATOR ',') rule_codes FROM event e JOIN event_evidence ee ON ee.event_id=e.id JOIN rule_hit rh ON rh.id=ee.rule_hit_id</sql>
+  <sql id="eventGroup">GROUP BY e.id, e.client_ip_mask, e.window_start, e.window_end, e.risk_score, e.severity, e.status</sql>
+  <select id="events" resultMap="eventRow"><include refid="eventSelect"/> <if test="batchId != null">WHERE EXISTS (SELECT 1 FROM event_evidence filter_ee JOIN rule_hit filter_rh ON filter_rh.id=filter_ee.rule_hit_id JOIN log_entry filter_l ON filter_l.id=filter_rh.log_entry_id WHERE filter_ee.event_id=e.id AND filter_l.batch_id=#{batchId})</if> <include refid="eventGroup"/> ORDER BY e.id DESC LIMIT 500</select>
+  <select id="event" resultMap="eventRow"><include refid="eventSelect"/> WHERE e.id=#{id} <include refid="eventGroup"/></select>
+  <select id="evidence" resultMap="evidenceRow">SELECT l.id, rh.rule_code, rh.matched_field, rh.evidence_snippet, rh.severity, l.log_time, l.raw_line_masked FROM event_evidence ee JOIN rule_hit rh ON rh.id=ee.rule_hit_id JOIN log_entry l ON l.id=rh.log_entry_id WHERE ee.event_id=#{id} ORDER BY l.log_time, l.id, rh.rule_code</select>
+</mapper>

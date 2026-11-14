@@ -1,0 +1,101 @@
+# ============================================================================
+# csys-template 一键启动：mysql + redis + backend + frontend(nginx)
+# 用法：
+#   1) cp .env.example .env       # 首次
+#   2) docker compose up -d --build
+#   3) 浏览器打开 http://localhost
+# 说明：所有可变项都从 .env 读取，禁止在源码里硬编码口令。
+# ============================================================================
+name: sentinel-log-detector
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sentinel-log-detector-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-log_detector}
+      MYSQL_USER: ${MYSQL_USER:-csys}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      TZ: ${TZ:-Asia/Shanghai}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: csys-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    container_name: csys-backend
+    restart: unless-stopped
+    environment:
+      DB_URL: ${DOCKER_DB_URL:-jdbc:mysql://mysql:3306/log_detector?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+      DB_USERNAME: ${DB_USERNAME:-${MYSQL_USER:-csys}}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL_MINUTES: ${JWT_TTL_MINUTES:-120}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-admin123}
+      LOG_IP_HMAC_KEY: ${LOG_IP_HMAC_KEY:?Set LOG_IP_HMAC_KEY in .env to a random value of at least 32 bytes}
+      LLM_MOCK: ${LLM_MOCK:-true}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-60}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: csys-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+    name: sentinel-log-detector-mysql-data
+  redis-data:
+    name: csys-redis-data

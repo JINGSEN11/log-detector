@@ -1,0 +1,51 @@
+# ---------- 密钥与环境 ----------
+.env
+.env.local
+*.pem
+*.key
+
+# ---------- Java / Maven ----------
+backend/target/
+*.class
+*.jar
+!backend/.mvn/wrapper/maven-wrapper.jar
+*.war
+hs_err_pid*.log
+
+# ---------- Node / Vite ----------
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# ---------- IDE ----------
+.idea/
+*.iml
+.vscode/
+*.ipr
+*.iws
+.settings/
+.classpath
+.project
+
+# ---------- 系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 本地演示文件 ----------
+/sample-access.log
+
+# ---------- 运行产物 ----------
+logs/
+*.log
+tmp/
+
+# Office 临时锁文件
+~$*
+
+# 不公开：课程文档与演示视频（仅 Gitee 私有仓库保留）
+docs/
+demo/

@@ -1,0 +1,35 @@
+{
+  "measuredAt": "2026-11-10T15:27:52",
+  "result": {
+    "batchId": 33,
+    "totalLines": 10000,
+    "parsedLines": 10000,
+    "skippedLines": 0,
+    "importMs": 3418.37,
+    "bytes": 1149570,
+    "detectionMs": 4929.02,
+    "hitCount": 10000,
+    "eventCount": 500
+  },
+  "memorySamples": [
+    {
+      "at": "2026-11-10T15:27:45.426",
+      "value": "476MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:27:47.501",
+      "value": "472.7MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:27:49.572",
+      "value": "518.5MiB / 15.49GiB"
+    },
+    {
+      "at": "2026-11-10T15:27:51.644",
+      "value": "520.4MiB / 15.49GiB"
+    }
+  ],
+  "errors": [],
+  "method": "one synthetic high-hit batch; sequential; no warmup; no P95",
+  "memory": "docker stats backend; sparse sampled working set not JVM heap peak"
+}

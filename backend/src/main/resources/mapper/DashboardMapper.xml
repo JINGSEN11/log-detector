@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.detection.mapper.DashboardMapper">
+  <resultMap id="severity" type="java.util.LinkedHashMap"><result property="severity" column="severity" javaType="string"/><result property="count" column="n" javaType="long"/></resultMap>
+  <resultMap id="source" type="java.util.LinkedHashMap"><result property="clientIpMask" column="mask" javaType="string"/><result property="eventCount" column="n" javaType="long"/></resultMap>
+  <resultMap id="latest" type="java.util.LinkedHashMap"><result property="id" column="id" javaType="long"/><result property="clientIpMask" column="client_ip_mask" javaType="string"/><result property="windowStart" column="window_start" javaType="java.time.LocalDateTime"/><result property="severity" column="severity" javaType="string"/><result property="riskScore" column="risk_score" javaType="java.math.BigDecimal"/><result property="status" column="status" javaType="string"/></resultMap>
+  <resultMap id="target" type="java.util.LinkedHashMap"><result property="batchId" column="batch_id" javaType="long"/><result property="lineNo" column="line_no" javaType="int"/></resultMap>
+  <resultMap id="context" type="java.util.LinkedHashMap"><result property="logId" column="id" javaType="long"/><result property="lineNo" column="line_no" javaType="int"/><result property="logTime" column="log_time" javaType="java.time.LocalDateTime"/><result property="rawLineMasked" column="raw_line_masked" javaType="string"/></resultMap>
+  <select id="eventWindowStarts" resultType="java.time.LocalDateTime">SELECT window_start FROM event WHERE window_start &gt;= #{from} AND window_start &lt; #{until}</select>
+  <select id="eventCount" resultType="long">SELECT COUNT(*) FROM event</select>
+  <select id="highSeverityEventCount" resultType="long">SELECT COUNT(*) FROM event WHERE severity IN ('HIGH','CRITICAL')</select>
+  <select id="logCount" resultType="long">SELECT COUNT(*) FROM log_entry WHERE parse_status='SUCCESS'</select>
+  <select id="aiAnalysisCount" resultType="long">SELECT COUNT(*) FROM ai_analysis</select>
+  <select id="severityDistribution" resultMap="severity">SELECT severity, COUNT(*) AS n FROM event GROUP BY severity ORDER BY severity</select>
+  <select id="topSources" resultMap="source">SELECT MIN(client_ip_mask) AS mask, COUNT(*) AS n FROM event GROUP BY client_ip_hash ORDER BY n DESC, client_ip_hash ASC LIMIT 10</select>
+  <select id="latestEvents" resultMap="latest">SELECT id, client_ip_mask, window_start, severity, risk_score, status FROM event ORDER BY window_start DESC, id DESC LIMIT 10</select>
+  <select id="contextTarget" resultMap="target">SELECT batch_id, line_no FROM log_entry WHERE id=#{logId} AND parse_status='SUCCESS'</select>
+  <sql id="contextSelect">SELECT id, line_no, log_time, raw_line_masked FROM log_entry WHERE batch_id=#{batchId} AND parse_status='SUCCESS' AND</sql>
+  <select id="contextBefore" resultMap="context"><include refid="contextSelect"/> line_no &lt; #{lineNo} ORDER BY line_no DESC LIMIT #{limit}</select>
+  <select id="contextCurrent" resultMap="context"><include refid="contextSelect"/> id = #{logId}</select>
+  <select id="contextAfter" resultMap="context"><include refid="contextSelect"/> line_no &gt; #{lineNo} ORDER BY line_no ASC LIMIT #{limit}</select>
+</mapper>

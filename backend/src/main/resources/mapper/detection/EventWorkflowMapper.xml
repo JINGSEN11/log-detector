@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.detection.mapper.EventWorkflowMapper">
+    <resultMap id="timelineResult" type="map">
+        <id property="id" column="id" javaType="java.lang.Long"/><result property="action" column="action" javaType="java.lang.String"/>
+        <result property="oldStatus" column="old_status" javaType="java.lang.String"/><result property="newStatus" column="new_status" javaType="java.lang.String"/>
+        <result property="note" column="note" javaType="java.lang.String"/><result property="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+        <result property="actor" column="username" javaType="java.lang.String"/>
+    </resultMap>
+    <resultMap id="exportResult" type="map">
+        <result property="id" column="id" javaType="java.lang.String"/><result property="clientIp" column="client_ip_mask" javaType="java.lang.String"/>
+        <result property="start" column="window_start" javaType="java.lang.String"/><result property="end" column="window_end" javaType="java.lang.String"/>
+        <result property="severity" column="severity" javaType="java.lang.String"/><result property="risk" column="risk_score" javaType="java.lang.String"/><result property="status" column="status" javaType="java.lang.String"/>
+    </resultMap>
+    <select id="lockStatus" resultType="string">SELECT status FROM event WHERE id=#{id} FOR UPDATE</select>
+    <update id="updateStatus">UPDATE event SET status=#{status} WHERE id=#{id}</update>
+    <insert id="insertStatusChange">INSERT INTO event_timeline (event_id,actor_user_id,action,old_status,new_status,note) VALUES (#{id},#{actorId},'STATUS_CHANGE',#{oldStatus},#{status},#{note})</insert>
+    <select id="countEvents" resultType="int">SELECT COUNT(*) FROM event WHERE id=#{id}</select>
+    <select id="timeline" resultMap="timelineResult">SELECT t.id,t.action,t.old_status,t.new_status,t.note,t.created_at,u.username FROM event_timeline t LEFT JOIN app_user u ON u.id=t.actor_user_id WHERE t.event_id=#{id} ORDER BY t.created_at,t.id</select>
+    <select id="forEachExportRow" resultMap="exportResult">SELECT e.id,e.client_ip_mask,e.window_start,e.window_end,e.severity,e.risk_score,e.status FROM event e <if test="batchId != null">WHERE EXISTS (SELECT 1 FROM event_evidence filter_ee JOIN rule_hit filter_rh ON filter_rh.id=filter_ee.rule_hit_id JOIN log_entry filter_l ON filter_l.id=filter_rh.log_entry_id WHERE filter_ee.event_id=e.id AND filter_l.batch_id=#{batchId})</if> ORDER BY e.id DESC</select>
+    <insert id="audit">INSERT INTO audit_log (actor_user_id,action,target_type,target_id,trace_id) VALUES (#{actorId},#{action},'EVENT',#{id},#{traceId})</insert>
+</mapper>

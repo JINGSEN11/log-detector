@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.detection.mapper.AnalysisCostMapper">
+    <resultMap id="requestsResult" type="map"><result property="request_count" column="request_count"/><result property="cache_hits" column="cache_hits"/><result property="saved_tokens" column="saved_tokens"/></resultMap>
+    <resultMap id="callsResult" type="map"><result property="call_count" column="call_count"/><result property="prompt_tokens" column="prompt_tokens"/><result property="completion_tokens" column="completion_tokens"/><result property="avg_ms" column="avg_ms"/><result property="unknown_tokens" column="unknown_tokens"/></resultMap>
+    <resultMap id="recentResult" type="map">
+        <id property="id" column="id" javaType="java.lang.Long"/><result property="eventId" column="event_id" javaType="java.lang.Long"/>
+        <result property="model" column="model"/><result property="outcome" column="outcome"/><result property="elapsedMs" column="elapsed_ms" javaType="java.lang.Long"/>
+        <result property="promptTokens" column="prompt_tokens" javaType="java.lang.Integer"/><result property="completionTokens" column="completion_tokens" javaType="java.lang.Integer"/>
+        <result property="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+    </resultMap>
+    <select id="findSources" resultType="long">SELECT a.id FROM analysis_cache_record c JOIN ai_analysis a ON a.id=c.analysis_id WHERE c.fingerprint=#{fingerprint} AND c.cache_source_id IS NULL AND a.event_id=#{eventId} AND a.status='SUCCESS' AND a.created_at &gt;= #{cutoff} ORDER BY a.id DESC LIMIT 1</select>
+    <select id="savedTokens" resultType="int">SELECT saved_tokens FROM analysis_cache_record WHERE analysis_id=#{sourceId}</select>
+    <insert id="recordAttempt">INSERT INTO analysis_model_attempt (event_id, model, outcome, elapsed_ms, prompt_tokens, completion_tokens) VALUES (#{eventId}, #{model}, #{outcome}, #{elapsed}, #{promptTokens}, #{completionTokens})</insert>
+    <select id="requests" resultMap="requestsResult">SELECT COUNT(*) request_count, COALESCE(SUM(CASE WHEN cache_source_id IS NOT NULL THEN 1 ELSE 0 END),0) cache_hits, COALESCE(SUM(CASE WHEN cache_source_id IS NOT NULL THEN saved_tokens ELSE 0 END),0) saved_tokens FROM analysis_cache_record</select>
+    <select id="calls" resultMap="callsResult">SELECT COUNT(*) call_count, COALESCE(SUM(prompt_tokens),0) prompt_tokens, COALESCE(SUM(completion_tokens),0) completion_tokens, AVG(elapsed_ms) avg_ms, COALESCE(SUM(CASE WHEN prompt_tokens IS NULL THEN 1 ELSE 0 END),0) unknown_tokens FROM analysis_model_attempt</select>
+    <select id="recentCalls" resultMap="recentResult">SELECT id,event_id,model,outcome,elapsed_ms,prompt_tokens,completion_tokens,created_at FROM analysis_model_attempt ORDER BY id DESC LIMIT 100</select>
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csys.logdetector.detection.mapper.EventAnalysisMapper">
+    <resultMap id="analysis" type="java.util.HashMap">
+        <id property="id" column="id" javaType="java.lang.Long"/>
+        <result property="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+        <result property="requestedBy" column="requested_by" javaType="java.lang.Long"/>
+        <result property="status" column="status" javaType="java.lang.String"/>
+        <result property="summary" column="summary" javaType="java.lang.String"/>
+        <result property="attackChain" column="attack_chain" javaType="java.lang.String"/>
+        <result property="recommendations" column="recommendations" javaType="java.lang.String"/>
+        <result property="confidence" column="confidence" javaType="java.math.BigDecimal"/>
+        <result property="falsePositiveHint" column="false_positive_notes" javaType="java.lang.String"/>
+        <result property="model" column="model" javaType="java.lang.String"/>
+        <result property="costMs" column="cost_ms" javaType="java.lang.Long"/>
+        <result property="promptTokens" column="prompt_tokens" javaType="java.lang.Integer"/>
+        <result property="completionTokens" column="completion_tokens" javaType="java.lang.Integer"/>
+        <result property="cacheRecordId" column="cache_record_id" javaType="java.lang.Long"/>
+        <result property="cacheSourceId" column="cache_source_id" javaType="java.lang.Long"/>
+    </resultMap>
+    <sql id="analysisColumns">SELECT a.*, c.analysis_id cache_record_id, c.cache_source_id FROM ai_analysis a LEFT JOIN analysis_cache_record c ON c.analysis_id=a.id</sql>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_analysis (event_id, requested_by, status, model, summary, attack_chain, recommendations, confidence, false_positive_notes, prompt_tokens, completion_tokens, cost_ms)
+        VALUES (#{eventId}, #{actor}, #{status}, #{model}, #{summary}, #{chain}, #{recommendations}, #{confidence}, #{falsePositiveHint}, #{promptTokens}, #{completionTokens}, #{costMs})
+    </insert>
+    <select id="evidenceCount" resultType="long">SELECT COUNT(*) FROM event_evidence ee JOIN rule_hit rh ON rh.id=ee.rule_hit_id WHERE ee.event_id=#{eventId} AND rh.log_entry_id=#{logId}</select>
+    <insert id="insertEvidence">INSERT INTO ai_analysis_evidence (analysis_id, log_entry_id, citation_order, stage_no) VALUES (#{analysisId}, #{logId}, #{order}, #{stage})</insert>
+    <insert id="insertCache">INSERT INTO analysis_cache_record (analysis_id, fingerprint, cache_source_id, saved_tokens) VALUES (#{analysisId}, #{fingerprint}, #{sourceId}, #{savedTokens})</insert>
+    <select id="get" resultMap="analysis"><include refid="analysisColumns"/> WHERE a.id=#{analysisId}</select>
+    <select id="latest" resultMap="analysis"><include refid="analysisColumns"/> WHERE a.event_id=#{eventId} ORDER BY a.created_at DESC, a.id DESC LIMIT 1</select>
+    <select id="count" resultType="long">SELECT COUNT(*) FROM ai_analysis WHERE event_id=#{eventId}</select>
+    <select id="list" resultMap="analysis"><include refid="analysisColumns"/> WHERE a.event_id=#{eventId} ORDER BY a.created_at DESC, a.id DESC LIMIT #{limit} OFFSET #{offset}</select>
+    <select id="eventCount" resultType="long">SELECT COUNT(*) FROM event WHERE id=#{eventId}</select>
+</mapper>

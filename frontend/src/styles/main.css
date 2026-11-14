@@ -1,0 +1,50 @@
+:root {
+  --csys-bg: #f4f7fa;
+  --csys-header: #111e30;
+  --csys-text: #263a50;
+  --csys-border: #e6ecf2;
+  --csys-muted: #627386;
+  --csys-surface: #ffffff;
+  --csys-accent: #347bb6;
+  --el-color-primary: #347bb6;
+  --el-color-primary-light-3: #719fc9;
+  --el-color-primary-light-5: #9abddb;
+  --el-color-primary-light-7: #c2d7e9;
+  --el-color-primary-light-8: #d6e5f0;
+  --el-color-primary-light-9: #ebf2f8;
+  --el-color-primary-dark-2: #2a6292;
+  --el-border-radius-base: 5px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--csys-bg);
+  color: var(--csys-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid #6ea7d6;
+  outline-offset: 2px;
+}
