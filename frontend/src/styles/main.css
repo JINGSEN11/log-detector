@@ -1,50 +1,169 @@
+/* ===== 亮色（默认）===== */
 :root {
-  --csys-bg: #f4f7fa;
-  --csys-header: #111e30;
-  --csys-text: #263a50;
-  --csys-border: #e6ecf2;
-  --csys-muted: #627386;
+  --csys-bg: #f7f8fa;
+  --csys-header: #ffffff;
   --csys-surface: #ffffff;
-  --csys-accent: #347bb6;
-  --el-color-primary: #347bb6;
-  --el-color-primary-light-3: #719fc9;
-  --el-color-primary-light-5: #9abddb;
-  --el-color-primary-light-7: #c2d7e9;
-  --el-color-primary-light-8: #d6e5f0;
-  --el-color-primary-light-9: #ebf2f8;
-  --el-color-primary-dark-2: #2a6292;
-  --el-border-radius-base: 5px;
+  --csys-surface-2: #f2f4f7;
+
+  --csys-text: #16181d;
+  --csys-muted: #5b6470;
+  --csys-faint: #8a929e;
+
+  --csys-border: rgba(0, 0, 0, 0.10);
+  --csys-border-subtle: rgba(0, 0, 0, 0.06);
+
+  --csys-accent: #1f6feb;
+  --csys-accent-hover: #1a5fd0;
+  --csys-accent-soft: rgba(31, 111, 235, 0.10);
+  --csys-accent-border: rgba(31, 111, 235, 0.22);
+  --csys-hover: rgba(0, 0, 0, 0.04);
+  --csys-hover-strong: rgba(0, 0, 0, 0.06);
+
+  --csys-critical: #cf222e;
+  --csys-high: #bc4c00;
+  --csys-medium: #9a6700;
+  --csys-low: #6e7781;
+  --csys-success: #1a7f37;
+  --csys-critical-soft: rgba(207, 34, 46, 0.12);
+  --csys-high-soft: rgba(188, 76, 0, 0.12);
+  --csys-medium-soft: rgba(154, 103, 0, 0.12);
+  --csys-low-soft: rgba(110, 119, 129, 0.12);
+  --csys-success-soft: rgba(26, 127, 55, 0.12);
+
+  --el-color-primary: #1f6feb;
+  --el-color-primary-light-3: #629af1;
+  --el-color-primary-light-5: #8fb7f5;
+  --el-color-primary-light-7: #bcd4f9;
+  --el-color-primary-light-8: #d2e2fb;
+  --el-color-primary-light-9: #e9f1fd;
+  --el-color-primary-dark-2: #1959bc;
+  --el-border-radius-base: 6px;
+
+  --el-bg-color: #ffffff;
+  --el-bg-color-overlay: #ffffff;
+  --el-bg-color-page: #f7f8fa;
+  --el-text-color-primary: #16181d;
+  --el-text-color-regular: #5b6470;
+  --el-text-color-secondary: #8a929e;
+  --el-text-color-placeholder: #a8b0ba;
+  --el-border-color: rgba(0, 0, 0, 0.10);
+  --el-border-color-light: rgba(0, 0, 0, 0.08);
+  --el-border-color-lighter: rgba(0, 0, 0, 0.06);
+  --el-border-color-extra-light: rgba(0, 0, 0, 0.04);
+  --el-fill-color-blank: #ffffff;
+  --el-fill-color-light: #f4f6f8;
+  --el-fill-color-lighter: #f7f8fa;
+  --el-fill-color: #f2f4f7;
+  --el-mask-color: rgba(255, 255, 255, 0.6);
 }
 
-* {
-  box-sizing: border-box;
+/* ===== 暗色 ===== */
+html.dark {
+  color-scheme: dark;
+  --csys-bg: #08090a;
+  --csys-header: #0a0b0c;
+  --csys-surface: #0f1011;
+  --csys-surface-2: #141516;
+
+  --csys-text: #f7f8f8;
+  --csys-muted: #8a8f98;
+  --csys-faint: #62666d;
+
+  --csys-border: rgba(255, 255, 255, 0.08);
+  --csys-border-subtle: rgba(255, 255, 255, 0.06);
+
+  --csys-accent: #3ea6ff;
+  --csys-accent-hover: #68b7ff;
+  --csys-accent-soft: rgba(62, 166, 255, 0.10);
+  --csys-accent-border: rgba(62, 166, 255, 0.22);
+  --csys-hover: rgba(255, 255, 255, 0.04);
+  --csys-hover-strong: rgba(255, 255, 255, 0.06);
+
+  --csys-critical: #f85149;
+  --csys-high: #f0883e;
+  --csys-medium: #d29922;
+  --csys-low: #8b98a5;
+  --csys-success: #2ea043;
+  --csys-critical-soft: rgba(248, 81, 73, 0.14);
+  --csys-high-soft: rgba(240, 136, 62, 0.14);
+  --csys-medium-soft: rgba(210, 153, 34, 0.14);
+  --csys-low-soft: rgba(139, 152, 165, 0.14);
+  --csys-success-soft: rgba(46, 160, 67, 0.12);
+
+  --el-color-primary: #3ea6ff;
+  --el-color-primary-light-3: #68b7ff;
+  --el-color-primary-light-5: #8cc7ff;
+  --el-color-primary-light-7: #b0d9ff;
+  --el-color-primary-light-8: #c2e2ff;
+  --el-color-primary-light-9: #d4ebff;
+  --el-color-primary-dark-2: #3285d1;
+
+  --el-bg-color: #0f1011;
+  --el-bg-color-overlay: #141516;
+  --el-bg-color-page: #08090a;
+  --el-text-color-primary: #f7f8f8;
+  --el-text-color-regular: #d0d6e0;
+  --el-text-color-secondary: #8a8f98;
+  --el-text-color-placeholder: #62666d;
+  --el-border-color: rgba(255, 255, 255, 0.08);
+  --el-border-color-light: rgba(255, 255, 255, 0.08);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.06);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.04);
+  --el-fill-color-blank: #0f1011;
+  --el-fill-color-light: #141516;
+  --el-fill-color-lighter: #141516;
+  --el-fill-color: #141516;
+  --el-mask-color: rgba(0, 0, 0, 0.6);
 }
 
-html,
-body,
-#app {
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; }
+html, body, #app { min-height: 100%; margin: 0; padding: 0; }
+html { background: var(--csys-bg); }
 
 body {
   background: var(--csys-bg);
   color: var(--csys-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv01', 'ss03';
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* ===== 主题切换过渡（只动颜色，不动布局）===== */
+body, html,
+.layout, .layout__aside, .layout__header, .layout__main,
+.panel, .stat, .metric, .metric--primary, .trend, .bar, .headline,
+.badge, .sev-critical, .sev-high, .sev-medium, .sev-low,
+.filter-bar, .filter, .login, .login__panel, .login__intro,
+.audit .panel, .log-import .panel, .events .panel, .home .panel {
+  transition: background-color .28s ease, border-color .28s ease, color .28s ease, box-shadow .28s ease;
 }
 
-button, input, textarea {
-  font: inherit;
+/* 卡片悬停微反馈 */
+.stat:hover, .metric:hover {
+  border-color: var(--csys-accent-border);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+.stat, .metric { transition: background-color .28s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+
+/* 趋势柱生长动画 */
+.bar { transition: height .45s cubic-bezier(0.4, 0, 0.2, 1), background-color .28s ease; }
+
+/* 页面切换 */
+.page-enter-active, .page-leave-active { transition: opacity .18s ease, transform .18s ease; }
+.page-enter-from { opacity: 0; transform: translateY(6px); }
+.page-leave-to { opacity: 0; transform: translateY(-4px); }
+
+/* 等宽：数字 / ID / IP / 时间戳 / 日志内容 */
+.mono, code, pre, .num {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-:focus-visible {
-  outline: 2px solid #6ea7d6;
-  outline-offset: 2px;
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font: inherit; }
+:focus-visible { outline: 2px solid var(--csys-accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
 }

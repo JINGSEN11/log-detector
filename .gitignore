@@ -42,10 +42,10 @@ desktop.ini
 logs/
 *.log
 tmp/
-
+.tmp/
+.run/
+.localdb/
+.work/
+.m2-settings.xml
 # Office 临时锁文件
 ~$*
-
-# 不公开：课程文档与演示视频（仅 Gitee 私有仓库保留）
-docs/
-demo/

@@ -6,6 +6,19 @@ spring:
   application:
     name: csys-template
 
+  # 分布式限流：连不上 Redis 时自动降级到本地窗口，不影响服务可用性
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 800ms
+      connect-timeout: 800ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
   servlet:
     multipart:
       max-file-size: 10MB

@@ -5,29 +5,13 @@
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-78%20passed-4c1?logo=openjdk)
+![Tests](https://img.shields.io/badge/tests-103%20passed-4c1?logo=openjdk)
 
 > 面向 Web 访问日志的攻击检测与智能研判平台：自研多格式解析、入库前脱敏、规则引擎初筛、大模型攻击链研判，覆盖「日志接入 → 检测 → 事件聚合 → 研判 → 下钻导出」完整闭环。
 
 在真实 SOC 里，分析师每天面对几十万到上千万条 Web 日志，攻击往往被三类噪声淹没：互联网无差别扫描、正常业务产生的高频 404、以及混在普通请求里的 SQL 注入 / XSS / 路径穿越。传统规则引擎能回答"有没有命中"，却回答不了"这意味着什么"。
 
 本平台用**规则引擎高召回圈出异常 → 大模型归纳攻击链与处置建议**的组合解决这个问题；同时把「日志是不可信输入」落实到入库前脱敏、Prompt 注入隔离与证据白名单上——攻击者可以把 UA/URL 写成"忽略以上指令"，但平台不会因此被污染。
-
-## 界面预览
-
-暗色模式（默认）· 安全概览：
-
-![仪表盘 · 安全概览（暗色）](screenshots/dashboard.png)
-
-亮色模式 · 右上角一键切换：
-
-![仪表盘 · 安全概览（亮色）](screenshots/dashboard-light.png)
-
-规则检测与事件 · 严重度筛选与风险分级：
-
-![规则检测与事件](screenshots/events.png)
-
-> 演示数据：24 小时事件趋势、严重度构成、高频来源 IP（已脱敏为 `a.b.c.***`）。AI 研判为按需触发 + 结果缓存，非全量调用，故研判数（25）远小于事件数（1,679）。
 
 ---
 
@@ -42,7 +26,7 @@
 | **攻击事件聚合** | 同一 IP + 时间窗内的多条命中聚合为一个事件，含风险分、最高严重度、规则集合、命中数、证据日志 ID |
 | **LLM 智能研判** | 结构化输出 `{summary, attack_chain, recommendations, confidence, false_positive_notes}`；证据白名单强校验；非 JSON 或证据 ID 全无效时重试 1 次再降级为 `RULE_FALLBACK` |
 | **Prompt 注入防御**（核心考点） | 不可信数据信封、NFKC 归一化、指令片段移除、特殊 token 转义、`<`/`>` 转义后才进模型 |
-| **审计 / 限流 / 成本** | 登录、导入、研判、状态变更、导出全程审计；登录 8 次/5min、研判 12 次/5min 限流；研判结果缓存 + token 成本看板 |
+| **审计 / 限流 / 成本** | 登录、导入、研判、状态变更、导出全程审计；登录 8 次/5min、研判 12 次/5min 限流，计数走 Redis + Lua 滑动窗口，多实例共享同一份阈值，Redis 不可用时熔断 30 秒自动降级本地窗口；研判结果缓存 + token 成本看板 |
 | **导出** | 脱敏 CSV（防公式注入）、单事件 Markdown 报告、含中文字体的 PDF 报告 |
 
 ---
@@ -136,11 +120,11 @@ cd frontend && npm install && npm run dev   # http://localhost:5173 ，/api 已�
 
 ## 效果评估
 
-评测报告与原始数据见 [`benchmark/`](benchmark/)。以下数字来自 2026-11-10 的评测记录，**口径已如实标注**：
+评测报告与原始数据见 [`docs/evaluation/`](docs/evaluation/)。以下数字来自 2026-11-10 的评测记录，**口径已如实标注**：
 
-- **规则评测**（[`benchmark/P1-2-评测说明和测试记录.md`](benchmark/P1-2-评测说明和测试记录.md)）：31 个人工标注的合成场景 × 15 条规则 = 465 个「场景×规则」判定；micro **Precision / Recall / F1 = 1.000**（TP=17，FP=0，FN=0）。*口径：小型合成集、场景针对既有规则构造，不代表真实检出率/误报率。*
-- **真实模型评测**（[`benchmark/P1-2-真实模型评测记录.md`](benchmark/P1-2-真实模型评测记录.md)）：deepseek-flash 对 16 个命中场景调用，16/16 通过结构化与证据 ID 校验，无重试、无降级；输入 3,624 token、输出 8,759 token。*口径：结构校验通过 ≠ 事实正确，威胁类型区分受输入上下文约束。*
-- **性能**（[`benchmark/P1-5-性能初测记录.md`](benchmark/P1-5-性能初测记录.md)）：
+- **规则评测**（[`docs/evaluation/P1-2-评测说明和测试记录.md`](docs/evaluation/P1-2-评测说明和测试记录.md)）：31 个人工标注的合成场景 × 15 条规则 = 465 个「场景×规则」判定；micro **Precision / Recall / F1 = 1.000**（TP=17，FP=0，FN=0）。*口径：小型合成集、场景针对既有规则构造，不代表真实检出率/误报率。*
+- **真实模型评测**（[`docs/evaluation/P1-2-真实模型评测记录.md`](docs/evaluation/P1-2-真实模型评测记录.md)）：deepseek-flash 对 16 个命中场景调用，16/16 通过结构化与证据 ID 校验，无重试、无降级；输入 3,624 token、输出 8,759 token。*口径：结构校验通过 ≠ 事实正确，威胁类型区分受输入上下文约束。*
+- **性能**（[`docs/evaluation/P1-5-性能初测记录.md`](docs/evaluation/P1-5-性能初测记录.md)）：
 
 | 规模 | 导入耗时 | 检测耗时（干净样本） |
 |---|---:|---:|
@@ -148,7 +132,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173 ，/api 已�
 | 3 万行 | ~8.3 s | 644 ms |
 
   *口径：单次测量、无预热、含 DB 写入，非容量上限。*
-- **测试**：`mvn -f backend/pom.xml test` → **78 项通过**，0 失败 / 0 错误 / 0 跳过。
+- **测试**：`mvn -f backend/pom.xml test` → **103 项通过**，0 失败 / 0 错误 / 1 跳过。
 
 ---
 
@@ -180,8 +164,9 @@ Log_Detector/
 │       ├── audit/                # 审计
 │       └── common/  config/      # 统一响应、全局异常、Trace ID
 ├── frontend/                     # Vue 3 + Vite + Element Plus + ECharts
-├── benchmark/                    # 评测报告与原始数据（本文档「效果评估」出处）
-├── screenshots/                  # 界面截图
+├── docs/
+│   ├── evaluation/               # 评测报告与原始数据（本文档「效果评估」出处）
+│   └── images/                   # 架构图
 └── ...
 ```
 
@@ -211,4 +196,4 @@ Log_Detector/
 
 **后端**：Java 17 · Spring Boot 3.3 · MyBatis-Plus · JdbcTemplate · MySQL 8 · JWT (jjwt) · RE2J · PDFBox · JDK HttpClient
 **前端**：Vue 3 · TypeScript · Vite · Element Plus · Pinia · ECharts
-**基础设施**：Docker Compose · Nginx · Redis（限流/缓存，可选）
+**基础设施**：Docker Compose · Nginx · Redis 7（Lua 滑动窗口分布式限流，不可用时自动降级本地）
